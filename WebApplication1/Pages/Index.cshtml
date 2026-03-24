@@ -1,0 +1,19 @@
+﻿@page
+@model IndexModel
+
+<h2>Upload pliku Excel</h2>
+
+<form method="post" enctype="multipart/form-data">
+    <input type="file" asp-for="UploadedFile" />
+    <button type="submit">Przetwórz i pobierz</button>
+</form>
+
+@if (!ViewContext.ViewData.ModelState.IsValid)
+{
+    <div style="color:red; margin-top:20px;">
+        @foreach (var error in ViewContext.ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
