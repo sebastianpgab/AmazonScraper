@@ -1,11 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY WebApplication1/WebApplication1.csproj WebApplication1/
-RUN dotnet restore WebApplication1/WebApplication1.csproj
+COPY WebApplication1.csproj ./
+RUN dotnet restore
 
-COPY . .
-WORKDIR /src/WebApplication1
+COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
