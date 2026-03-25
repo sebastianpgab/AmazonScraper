@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using WebApplication1.Models;
 using WebApplication1.Services;
 
@@ -30,6 +31,15 @@ builder.Services.AddScoped<ExcelWriterService>();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
+
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedHeadersOptions);
 
 if (!app.Environment.IsDevelopment())
 {

@@ -1,12 +1,21 @@
-FROM mcr.microsoft.com/playwright/dotnet:v1.58.0-jammy
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-WORKDIR /app
+COPY WebApplication1/WebApplication1.csproj WebApplication1/
+RUN dotnet restore WebApplication1/WebApplication1.csproj
 
 COPY . .
+WORKDIR /src/WebApplication1
+RUN dotnet publish -c Release -o /app/publish
 
-RUN dotnet restore
-RUN dotnet publish -c Release -o out
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
 
-WORKDIR /app/out
+COPY --from=build /app/publish .
 
-CMD ["dotnet", "WebApplication1.dll"]
+EXPOSE 8080
+
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["dotnet", "WebApplication1.dll"]

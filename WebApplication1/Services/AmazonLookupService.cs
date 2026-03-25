@@ -37,6 +37,11 @@ namespace WebApplication1.Services
 
         public async Task<AmazonProductData> GetProductDataAsync(string asin, bool downloadImage = false)
         {
+            if (string.IsNullOrWhiteSpace(_options.Username))
+                throw new Exception("Oxylabs Username is EMPTY");
+
+            if (string.IsNullOrWhiteSpace(_options.Password))
+                throw new Exception("Oxylabs Password is EMPTY");
             asin = CleanAsin(asin);
 
             if (string.IsNullOrWhiteSpace(asin) || asin.Length != 10)
