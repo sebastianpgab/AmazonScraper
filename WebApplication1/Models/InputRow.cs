@@ -4,17 +4,17 @@
     {
         public int ExcelRowNumber { get; set; }
 
-        public string? InternalCode { get; set; }
-        public string? ProductCode { get; set; }
-        public string? ProductName { get; set; }
-        public string? Ean { get; set; }
-        public string? Asin { get; set; }
-        public string? Condition { get; set; }
-        public string? Marketplace { get; set; }
-        public string? Price { get; set; }
+        public string InternalCode { get; set; } = string.Empty;
+        public string ProductCode { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public string Ean { get; set; } = string.Empty;
+        public string Asin { get; set; } = string.Empty;
+        public string Condition { get; set; } = string.Empty;
+        public string Marketplace { get; set; } = string.Empty;
+        public string Price { get; set; } = string.Empty;
 
         public string? MarketPrice { get; set; }
-        public byte[]? ImageBytes { get; set; }
         public string? Status { get; set; }
+        public byte[]? ImageBytes { get; set; }
     }
 }

@@ -1,30 +1,46 @@
+using WebApplication1.Models;
 using WebApplication1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.Configure<OxylabsOptions>(
+    builder.Configuration.GetSection("Oxylabs")
+);
+
+builder.Services.AddHttpClient("OxylabsClient", (sp, client) =>
+{
+    var options = sp.GetRequiredService<
+        Microsoft.Extensions.Options.IOptions<OxylabsOptions>>().Value;
+
+    client.BaseAddress = new Uri(options.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+});
+
+builder.Services.AddHttpClient("ImageClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0");
+});
+
+builder.Services.AddScoped<IAmazonLookupService, AmazonLookupService>();
 builder.Services.AddScoped<ExcelReaderService>();
 builder.Services.AddScoped<ProductEnrichmentService>();
 builder.Services.AddScoped<ExcelWriterService>();
-builder.Services.AddSingleton<AmazonLookupService>();
+
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapRazorPages();
 
 app.Run();

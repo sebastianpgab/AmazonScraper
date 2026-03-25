@@ -10,18 +10,14 @@ namespace WebApplication1.Services
             var results = new List<InputRow>();
 
             using var workbook = new XLWorkbook(fileStream);
-            var worksheet = workbook.Worksheet(1); // pierwszy arkusz
+            var worksheet = workbook.Worksheet(1);
 
             var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 0;
 
-            // zakładamy, że dane zaczynają się od 2 wiersza
-            // a wiersz 1 to nagłówki
             for (int row = 2; row <= lastRow; row++)
             {
                 if (RowIsEmpty(worksheet, row))
-                {
                     continue;
-                }
 
                 var item = new InputRow
                 {
@@ -47,9 +43,7 @@ namespace WebApplication1.Services
             for (int col = 1; col <= 8; col++)
             {
                 if (!string.IsNullOrWhiteSpace(worksheet.Cell(row, col).GetValue<string>()))
-                {
                     return false;
-                }
             }
 
             return true;

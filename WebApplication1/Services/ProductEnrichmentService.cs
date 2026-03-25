@@ -1,19 +1,24 @@
-﻿using WebApplication1.Models;
+﻿using Microsoft.Extensions.Options;
+using WebApplication1.Models;
 
 namespace WebApplication1.Services
 {
     public class ProductEnrichmentService
     {
-        private readonly AmazonLookupService _amazonLookupService;
+        private readonly IAmazonLookupService _amazonLookupService;
+        private readonly OxylabsOptions _options;
 
-        public ProductEnrichmentService(AmazonLookupService amazonLookupService)
+        public ProductEnrichmentService(
+            IAmazonLookupService amazonLookupService,
+            IOptions<OxylabsOptions> options)
         {
             _amazonLookupService = amazonLookupService;
+            _options = options.Value;
         }
 
         public async Task EnrichAsync(List<InputRow> rows)
         {
-            using var semaphore = new SemaphoreSlim(2);
+            using var semaphore = new SemaphoreSlim(_options.MaxConcurrency);
 
             var tasks = rows.Select(async row =>
             {
@@ -27,15 +32,15 @@ namespace WebApplication1.Services
                         return;
                     }
 
-                    var (price, imageBytes) = await _amazonLookupService.GetProductDataAsync(
+                    var result = await _amazonLookupService.GetProductDataAsync(
                         row.Asin,
                         downloadImage: true
                     );
 
-                    row.MarketPrice = price;
-                    row.ImageBytes = imageBytes; // będzie null, bo wyłączyliśmy obrazki
+                    row.MarketPrice = result.Price;
+                    row.ImageBytes = result.ImageBytes;
 
-                    if (string.IsNullOrWhiteSpace(price))
+                    if (string.IsNullOrWhiteSpace(result.Price))
                     {
                         row.Status = "Price missing";
                     }
@@ -46,7 +51,7 @@ namespace WebApplication1.Services
                 }
                 catch (Exception ex)
                 {
-                    row.Status = ex.Message;
+                    row.Status = ShortenStatus(ex.Message);
                 }
                 finally
                 {
@@ -55,6 +60,16 @@ namespace WebApplication1.Services
             });
 
             await Task.WhenAll(tasks);
+        }
+
+        private static string ShortenStatus(string? message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return "Unknown error";
+
+            return message.Length <= 150
+                ? message
+                : message[..150];
         }
     }
 }
